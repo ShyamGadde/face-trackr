@@ -1,7 +1,8 @@
-import cv2
-import face_recognition
-import cvzone
+from queue import Queue
 
+import cv2
+import cvzone
+import face_recognition
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
