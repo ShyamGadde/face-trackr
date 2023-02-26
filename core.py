@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import queue
+import threading
 from datetime import datetime
 
 import cv2
@@ -46,6 +47,7 @@ def detect_faces(faces_queue, exit_flag, status_code):
             )
         
         IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code.value]
+        status_code.value = "active"
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
@@ -62,18 +64,20 @@ def cache_database(path):
     face_encodings = []
     names = []
     ids = []
+    student_imgs = []
     for filename in os.listdir(path):
         # Fix so that it doesn't read hidden files
         if not filename.startswith("."):
             img = cv2.imread(os.path.join(path, filename), cv2.COLOR_BGR2RGB)
+            student_imgs.append(img)
             face_encodings.append(face_recognition.face_encodings(img)[0])
             names.append(" ".join(filename.split("_")[1:]).split(".")[0].title())
             ids.append(int(filename.split("_")[0]))
-    return face_encodings, names, ids
+    return face_encodings, ids, names, student_imgs
 
 
 def process_frame(faces_queue, exit_flag, status_code, attendees):
-    known_face_encodings, known_face_names, known_face_roll = cache_database(
+    known_face_encodings, known_face_ids, known_face_names, known_student_imgs = cache_database(
         "Student_DB"
     )
 
@@ -98,14 +102,19 @@ def process_frame(faces_queue, exit_flag, status_code, attendees):
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-                stud_id = known_face_roll[best_match_index]
+                stud_id = known_face_ids[best_match_index]
+                student_img = known_student_imgs[best_match_index]
 
                 if stud_id not in attendees:
+                    status_code.value = "marked"
                     attendees[stud_id] = (name, datetime.now().strftime("%I:%M %p"))
+                else:
+                    status_code.value = "already_marked"
 
 
 def create_session():
     faces_queue = multiprocessing.Queue()
+    console_status_queue = multiprocessing.Queue()
     exit_flag = multiprocessing.Value("i", 0)
     attendees = multiprocessing.Manager().dict()
     status_code = multiprocessing.Manager().Value(str, "active")
@@ -114,6 +123,7 @@ def create_session():
         target=detect_faces,
         args=(
             faces_queue,
+            console_status_queue,
             exit_flag,
             status_code,
         ),
@@ -124,6 +134,7 @@ def create_session():
         target=process_frame,
         args=(
             faces_queue,
+            console_status_queue,
             exit_flag,
             status_code,
             attendees,
@@ -135,3 +146,7 @@ def create_session():
     process_frame_process.join()
 
     generate_attendance_report(attendees)
+
+
+if __name__ == "__main__":
+    create_session()
