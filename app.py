@@ -9,9 +9,15 @@ import numpy as np
 from datetime import datetime
 
 IMG_BACKGROUND = cv2.imread("assets/background.png")
+STATUS_IMG = {
+    "active": cv2.imread("assets/status/active.png"),
+    "present": cv2.imread("assets/status/present.png"),
+    "marked": cv2.imread("assets/status/marked.png"),
+    "already_marked": cv2.imread("assets/status/already-marked.png"),
+}
 
 
-def detect_faces(faces_queue, exit_flag):
+def detect_faces(faces_queue, exit_flag, status_code):
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
@@ -35,6 +41,8 @@ def detect_faces(faces_queue, exit_flag):
             cornerRect(
                 IMG_BACKGROUND, (55 + left, 162 + top, right - left, bottom - top), rt=0
             )
+        
+        IMG_BACKGROUND[44:44 + 633, 808:808 + 414] = STATUS_IMG[status_code.value]
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
@@ -61,11 +69,11 @@ def cache_database(path):
     return face_encodings, names, roll
 
 
-def process_frame(faces_queue, exit_flag, attendees):
+def process_frame(faces_queue, exit_flag, status_code, attendees):
     known_face_encodings, known_face_names, known_face_roll = cache_database(
         "Student_DB"
     )
-    
+
     while True:
         try:
             frame, face_locations = faces_queue.get(timeout=1)
@@ -134,12 +142,14 @@ if __name__ == "__main__":
     faces_queue = multiprocessing.Queue()
     exit_flag = multiprocessing.Value("i", 0)
     attendees = multiprocessing.Manager().dict()
+    status_code = multiprocessing.Manager().Value(str, "active")
 
     detect_faces_process = multiprocessing.Process(
         target=detect_faces,
         args=(
             faces_queue,
             exit_flag,
+            status_code,
         ),
     )
     detect_faces_process.start()
@@ -149,6 +159,7 @@ if __name__ == "__main__":
         args=(
             faces_queue,
             exit_flag,
+            status_code,
             attendees,
         ),
     )
