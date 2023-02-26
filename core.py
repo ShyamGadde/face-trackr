@@ -45,7 +45,7 @@ def detect_faces(faces_queue, exit_flag, status_code):
                 rt=0
             )
         
-        IMG_BACKGROUND[44:44 + 633, 808:808 + 414] = STATUS_IMG[status_code.value]
+        IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code.value]
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
