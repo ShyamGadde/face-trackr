@@ -41,7 +41,8 @@ def detect_faces(faces_queue, exit_flag, status_code):
 
         for top, right, bottom, left in face_locations:
             cornerRect(
-                IMG_BACKGROUND, (55 + left, 162 + top, right - left, bottom - top), rt=0
+                IMG_BACKGROUND, (100 + left, 120 + top, right - left, bottom - top), 
+                rt=0
             )
         
         IMG_BACKGROUND[44:44 + 633, 808:808 + 414] = STATUS_IMG[status_code.value]
