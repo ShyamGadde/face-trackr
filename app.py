@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import queue
 
 import cv2
 import cvzone
@@ -9,10 +10,11 @@ import numpy as np
 IMG_BACKGROUND = cv2.imread("assets/background.png")
 
 
-def detect_faces(queue):
+def detect_faces(faces_queue, exit_flag):
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
+    counter = 0
 
     while True:
         ret, frame = cap.read()
@@ -22,7 +24,11 @@ def detect_faces(queue):
 
         IMG_BACKGROUND[162 : 162 + 480, 55 : 55 + 640] = frame
         face_locations = face_recognition.face_locations(frame)
-        queue.put((frame, face_locations))
+        
+        counter += 1
+        if counter % 10 == 0:
+            # Only send every tenth frame to the other process
+            faces_queue.put((frame, face_locations))
 
         for top, right, bottom, left in face_locations:
             cvzone.cornerRect(
@@ -33,6 +39,7 @@ def detect_faces(queue):
         cv2.waitKey(1)
 
         if cv2.getWindowProperty("Camera", cv2.WND_PROP_VISIBLE) < 1:
+            exit_flag.value = 1
             break
 
     cap.release()
@@ -53,14 +60,17 @@ def cache_database(path):
     return face_encodings, names, roll
 
 
-def process_frame(queue):
+def process_frame(faces_queue, exit_flag):
     known_face_encodings, known_face_names, known_face_roll = cache_database("Student_DB")
     counter = 0
     while True:
         try:
-            frame, face_locations = queue.get(timeout=1)
-        except multiprocessing.queues.Empty:
-            continue
+            frame, face_locations = faces_queue.get(timeout=1)
+        except queue.Empty:
+            if exit_flag.value:
+                break
+            else:
+                continue
         face_encodings = face_recognition.face_encodings(frame, face_locations)
 
         for face_encoding in face_encodings:
@@ -77,10 +87,12 @@ def process_frame(queue):
 
 if __name__ == "__main__":
     faces_queue = multiprocessing.Queue()
-    face_location_process = multiprocessing.Process(target=detect_faces, args=(faces_queue,))
-    face_location_process.start()
-    face_matching_process = multiprocessing.Process(target=process_frame, args=(faces_queue,))
-    face_matching_process.start()
+    exit_flag = multiprocessing.Value('i', 0)
 
-    face_location_process.join()
-    face_matching_process.join()
+    detect_faces_process = multiprocessing.Process(target=detect_faces, args=(faces_queue, exit_flag,))
+    detect_faces_process.start()
+    process_frame_process = multiprocessing.Process(target=process_frame, args=(faces_queue, exit_flag,))
+    process_frame_process.start()
+
+    detect_faces_process.join()
+    process_frame_process.join()
