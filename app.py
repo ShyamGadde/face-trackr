@@ -8,6 +8,16 @@ from core import create_session
 ctk.set_default_color_theme("dark-blue")
 
 
+def show_attendance_records():
+    """
+    A simple function that opens the folder containing the attendance records.
+
+    :return: None
+    """
+
+    os.startfile('attendance-records')
+
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -127,6 +137,7 @@ class App(ctk.CTk):
             width=300,
             height=100,
             font=("Courier New", 20, "bold"),
+            command=show_attendance_records,
         )
         self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=20)
         self.show_attendance_records_button.place(relx=0.5, rely=0.7, anchor="center")
