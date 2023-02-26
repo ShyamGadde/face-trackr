@@ -6,7 +6,7 @@ import cv2
 from cvzone import cornerRect
 import face_recognition
 import numpy as np
-from datetime import now
+import datetime
 
 IMG_BACKGROUND = cv2.imread("assets/background.png")
 
@@ -90,7 +90,7 @@ def process_frame(faces_queue, exit_flag, attendees):
                 roll = known_face_roll[best_match_index]
 
                 if roll not in attendees:
-                    attendees[roll] = (name, now().strftime("%I:%M %p"))
+                    attendees[roll] = (name, datetime.now().strftime("%I:%M %p"))
 
 
 def create_workbook():
@@ -127,7 +127,7 @@ def generate_attendance_report(attendees):
     for roll_num in attendees:
         worksheet.append([roll_num, attendees[roll_num][0], attendees[roll_num][1]])
 
-    workbook.save(f'attendance-records/{now().strftime("%d-%m-%y (%I.%M-%p)")}.xlsx')
+    workbook.save(f'attendance-records/{datetime.now().strftime("%d-%m-%y (%I.%M-%p)")}.xlsx')
 
 
 if __name__ == "__main__":
