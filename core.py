@@ -29,7 +29,8 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
     status_code = "active"
 
     def update_console_status():
-        nonlocal status_code, student_img
+        nonlocal status_code
+        nonlocal student_img
 
         while not exit_flag.value:
             try:
@@ -70,9 +71,9 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
                 rt=0
             )
         
+        IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code]
         if status_code == "present":
             IMG_BACKGROUND[145:145 + 216, 896:896 + 216] = student_img
-        IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code]
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
