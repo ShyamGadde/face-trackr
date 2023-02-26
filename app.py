@@ -131,9 +131,17 @@ class App(ctk.CTk):
         self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=20)
         self.show_attendance_records_button.place(relx=0.5, rely=0.7, anchor="center")
 
-        # create second frame
+        # create Admin frame
         self.admin_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.admin_frame.grid_columnconfigure(0, weight=1)
+        
+        self.tabview = ctk.CTkTabview(self.admin_frame, height=650, width=700)
+        self.tabview.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
+        self.tabview.add("Add Student")
+        self.tabview.add("View Students")
 
+        self.tabview.tab("Add Student").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        self.tabview.tab("View Students").grid_columnconfigure(0, weight=1)
 
 
         # select default frame
