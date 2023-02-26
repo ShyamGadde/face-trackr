@@ -155,3 +155,5 @@ if __name__ == "__main__":
 
     detect_faces_process.join()
     process_frame_process.join()
+
+    generate_attendance_report(attendees)
