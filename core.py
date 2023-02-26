@@ -31,7 +31,7 @@ def detect_faces(faces_queue, exit_flag, status_code):
         if not ret:
             break
 
-        IMG_BACKGROUND[162 : 162 + 480, 55 : 55 + 640] = frame
+        IMG_BACKGROUND[120 : 120 + 480, 100 : 100 + 640] = frame
         face_locations = face_recognition.face_locations(frame)
 
         counter += 1
