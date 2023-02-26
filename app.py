@@ -103,9 +103,9 @@ def create_workbook():
     worksheet.append(["Roll Number", "Name", "Time"])
     worksheet.freeze_panes = "A2"
     worksheet.row_dimensions[1].height = 20
-    worksheet.column_dimensions["A"].width = 14
-    worksheet.column_dimensions["B"].width = 25
-    worksheet.column_dimensions["C"].width = 12
+    worksheet.column_dimensions["A"].width = 20
+    worksheet.column_dimensions["B"].width = 30
+    worksheet.column_dimensions["C"].width = 15
 
     highlight = NamedStyle(name="highlight")
     highlight.font = Font(name="Times New Roman", bold=True, size=14)
@@ -143,6 +143,7 @@ if __name__ == "__main__":
         ),
     )
     detect_faces_process.start()
+
     process_frame_process = multiprocessing.Process(
         target=process_frame,
         args=(
