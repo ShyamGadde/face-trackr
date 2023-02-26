@@ -65,7 +65,7 @@ def process_frame(faces_queue, exit_flag, attendees):
     known_face_encodings, known_face_names, known_face_roll = cache_database(
         "Student_DB"
     )
-    counter = 0
+    
     while True:
         try:
             frame, face_locations = faces_queue.get(timeout=1)
