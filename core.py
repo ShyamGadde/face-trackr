@@ -3,6 +3,7 @@ import os
 import queue
 import threading
 import time
+from collections import deque
 from datetime import datetime
 
 import cv2
@@ -106,6 +107,7 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
     known_face_encodings, known_face_ids, known_face_names, known_student_imgs = cache_database(
         "Student_DB"
     )
+    previous_two = deque([None, None], maxlen=2)
 
     while True:
         try:
@@ -132,6 +134,11 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
                 name = known_face_names[best_match_index]
                 student_id = known_face_ids[best_match_index]
                 student_img = known_student_imgs[best_match_index]
+
+                # Check if it is the same student in the past two frames and skip if it is
+                if student_id == previous_two[0] == previous_two[1]:
+                    continue
+                previous_two.append(student_id)
 
                 if student_id not in attendees:
                     status = "marked"
