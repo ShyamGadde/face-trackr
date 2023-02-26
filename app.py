@@ -6,7 +6,7 @@ import cv2
 from cvzone import cornerRect
 import face_recognition
 import numpy as np
-import datetime
+from datetime import datetime
 
 IMG_BACKGROUND = cv2.imread("assets/background.png")
 
