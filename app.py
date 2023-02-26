@@ -58,15 +58,15 @@ def detect_faces(faces_queue, exit_flag, status_code):
 def cache_database(path):
     face_encodings = []
     names = []
-    roll = []
+    ids = []
     for filename in os.listdir(path):
         # Fix so that it doesn't read hidden files
         if not filename.startswith("."):
             img = cv2.imread(os.path.join(path, filename), cv2.COLOR_BGR2RGB)
             face_encodings.append(face_recognition.face_encodings(img)[0])
             names.append(" ".join(filename.split("_")[1:]).split(".")[0].title())
-            roll.append(int(filename.split("_")[0]))
-    return face_encodings, names, roll
+            ids.append(int(filename.split("_")[0]))
+    return face_encodings, names, ids
 
 
 def process_frame(faces_queue, exit_flag, status_code, attendees):
@@ -95,10 +95,10 @@ def process_frame(faces_queue, exit_flag, status_code, attendees):
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-                roll = known_face_roll[best_match_index]
+                stud_id = known_face_roll[best_match_index]
 
-                if roll not in attendees:
-                    attendees[roll] = (name, datetime.now().strftime("%I:%M %p"))
+                if stud_id not in attendees:
+                    attendees[stud_id] = (name, datetime.now().strftime("%I:%M %p"))
 
 
 def create_workbook():
@@ -108,7 +108,7 @@ def create_workbook():
     workbook = Workbook()
     worksheet = workbook.active
 
-    worksheet.append(["Roll Number", "Name", "Time"])
+    worksheet.append(["Student ID", "Name", "Time"])
     worksheet.freeze_panes = "A2"
     worksheet.row_dimensions[1].height = 20
     worksheet.column_dimensions["A"].width = 20
