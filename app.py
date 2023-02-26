@@ -116,7 +116,7 @@ class App(ctk.CTk):
             width=300,
             height=100,
             font=("Courier New", 20, "bold"),
-
+            command=create_session,
         )
         self.start_new_session_button.grid(row=3, column=0, padx=30, pady=20)
         self.start_new_session_button.place(relx=0.5, rely=0.5, anchor="center")
@@ -134,7 +134,7 @@ class App(ctk.CTk):
         # create second frame
         self.admin_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
-        
+
 
         # select default frame
         self.select_frame_by_name("home")
@@ -171,4 +171,3 @@ class App(ctk.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-    # create_session()
