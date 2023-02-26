@@ -1,171 +1,174 @@
-import multiprocessing
 import os
-import queue
 
-import cv2
-from cvzone import cornerRect
-import face_recognition
-import numpy as np
-from datetime import datetime
+import customtkinter as ctk
+from PIL import Image
 
-IMG_BACKGROUND = cv2.imread("assets/background.png")
-STATUS_IMG = {
-    "active": cv2.imread("assets/status/active.png"),
-    "present": cv2.imread("assets/status/present.png"),
-    "marked": cv2.imread("assets/status/marked.png"),
-    "already_marked": cv2.imread("assets/status/already-marked.png"),
-}
+from core import create_session
+
+ctk.set_default_color_theme("dark-blue")
 
 
-def detect_faces(faces_queue, exit_flag, status_code):
-    cap = cv2.VideoCapture(0)
-    cap.set(3, 640)
-    cap.set(4, 480)
-    counter = 0
+class App(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.width = 1080
+        self.height = 720
 
-    while True:
-        ret, frame = cap.read()
+        # Get screen width and height to center the window
+        self.screen_width = self.winfo_screenwidth()
+        self.screen_height = self.winfo_screenheight()
+        self.x = (self.screen_width / 2) - (self.width / 2)
+        self.y = (self.screen_height / 2) - (self.height / 2)
 
-        if not ret:
-            break
+        self.title("FaceTrackr")
+        self.geometry(f"{self.width}x{self.height}+{int(self.x)}+{int(self.y)}")
+        self.minsize(700, 500)
 
-        IMG_BACKGROUND[162 : 162 + 480, 55 : 55 + 640] = frame
-        face_locations = face_recognition.face_locations(frame)
+        # set grid layout 1x2
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
-        counter += 1
-        if counter % 10 == 0:
-            # Only send every tenth frame to the other process
-            faces_queue.put((frame, face_locations))
+        # load images with light and dark mode image
+        self.logo_image = ctk.CTkImage(
+            Image.open("assets/CustomTkinter_logo_single.png"),
+            size=(26, 26),
+        )
 
-        for top, right, bottom, left in face_locations:
-            cornerRect(
-                IMG_BACKGROUND, (55 + left, 162 + top, right - left, bottom - top), rt=0
-            )
+        self.home_image = ctk.CTkImage(
+            light_image=Image.open("assets/home-dark.png"),
+            dark_image=Image.open("assets/home-light.png"),
+            size=(20, 20),
+        )
+        self.admin_image = ctk.CTkImage(
+            light_image=Image.open("assets/admin-dark.png"),
+            dark_image=Image.open("assets/admin-light.png"),
+            size=(20, 20),
+        )
+        self.add_student_image = ctk.CTkImage(
+            light_image=Image.open("assets/add-student-dark.png"),
+            dark_image=Image.open("assets/add-student-light.png"),
+            size=(20, 20),
+        )
+
+        # create navigation frame
+        self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.navigation_frame.grid(row=0, column=0, sticky="nsew")
+        self.navigation_frame.grid_rowconfigure(4, weight=1)
+
+        self.navigation_frame_label = ctk.CTkLabel(
+            self.navigation_frame,
+            text="  FaceTrackr",
+            image=self.logo_image,
+            compound="left",
+            font=ctk.CTkFont(size=15, weight="bold"),
+        )
+        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
+
+        self.home_button = ctk.CTkButton(
+            self.navigation_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Home",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=self.home_image,
+            anchor="w",
+            command=self.home_button_event,
+        )
+        self.home_button.grid(row=1, column=0, sticky="ew")
+
+        self.admin_button = ctk.CTkButton(
+            self.navigation_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Admin Panel",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=self.admin_image,
+            anchor="w",
+            command=self.admin_button_event,
+        )
+        self.admin_button.grid(row=2, column=0, sticky="ew")
+
+        self.appearance_mode_label = ctk.CTkLabel(
+            self.navigation_frame, text="Appearance Mode:", anchor="w"
+        )
+        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(5, 0))
+
+        self.appearance_mode_menu = ctk.CTkOptionMenu(
+            self.navigation_frame,
+            values=["Dark", "Light", "System"],
+            command=self.change_appearance_mode_event,
+        )
+        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
+
+        # create home frame
+        self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.home_frame.grid_columnconfigure(0, weight=1)
+
+        self.start_new_session_button = ctk.CTkButton(
+            self.home_frame,
+            text="Start New Session",
+            width=300,
+            height=100,
+            font=("Courier New", 20, "bold"),
+
+        )
+        self.start_new_session_button.grid(row=3, column=0, padx=30, pady=20)
+        self.start_new_session_button.place(relx=0.5, rely=0.5, anchor="center")
+
+        self.show_attendance_records_button = ctk.CTkButton(
+            self.home_frame,
+            text="Show Attendance Records",
+            width=300,
+            height=100,
+            font=("Courier New", 20, "bold"),
+        )
+        self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=20)
+        self.show_attendance_records_button.place(relx=0.5, rely=0.7, anchor="center")
+
+        # create second frame
+        self.admin_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+
         
-        IMG_BACKGROUND[44:44 + 633, 808:808 + 414] = STATUS_IMG[status_code.value]
 
-        cv2.imshow("Camera", IMG_BACKGROUND)
-        cv2.waitKey(1)
+        # select default frame
+        self.select_frame_by_name("home")
 
-        if cv2.getWindowProperty("Camera", cv2.WND_PROP_VISIBLE) < 1:
-            exit_flag.value = 1
-            break
+    def select_frame_by_name(self, name):
+        # set button color for selected button
+        self.home_button.configure(
+            fg_color=("gray75", "gray25") if name == "home" else "transparent"
+        )
+        self.admin_button.configure(
+            fg_color=("gray75", "gray25") if name == "admin" else "transparent"
+        )
 
-    cap.release()
-    cv2.destroyAllWindows()
+        # show selected frame
+        if name == "home":
+            self.home_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.home_frame.grid_forget()
+        if name == "admin":
+            self.admin_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.admin_frame.grid_forget()
 
+    def home_button_event(self):
+        self.select_frame_by_name("home")
 
-def cache_database(path):
-    face_encodings = []
-    names = []
-    ids = []
-    for filename in os.listdir(path):
-        # Fix so that it doesn't read hidden files
-        if not filename.startswith("."):
-            img = cv2.imread(os.path.join(path, filename), cv2.COLOR_BGR2RGB)
-            face_encodings.append(face_recognition.face_encodings(img)[0])
-            names.append(" ".join(filename.split("_")[1:]).split(".")[0].title())
-            ids.append(int(filename.split("_")[0]))
-    return face_encodings, names, ids
+    def admin_button_event(self):
+        self.select_frame_by_name("admin")
 
-
-def process_frame(faces_queue, exit_flag, status_code, attendees):
-    known_face_encodings, known_face_names, known_face_roll = cache_database(
-        "Student_DB"
-    )
-
-    while True:
-        try:
-            frame, face_locations = faces_queue.get(timeout=1)
-        except queue.Empty:
-            if exit_flag.value:
-                break
-            else:
-                continue
-        face_encodings = face_recognition.face_encodings(frame, face_locations)
-
-        for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(
-                known_face_encodings, face_encoding
-            )
-
-            face_distances = face_recognition.face_distance(
-                known_face_encodings, face_encoding
-            )
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
-                name = known_face_names[best_match_index]
-                stud_id = known_face_roll[best_match_index]
-
-                if stud_id not in attendees:
-                    attendees[stud_id] = (name, datetime.now().strftime("%I:%M %p"))
-
-
-def create_workbook():
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Border, Font, NamedStyle, PatternFill, Side
-
-    workbook = Workbook()
-    worksheet = workbook.active
-
-    worksheet.append(["Student ID", "Name", "Time"])
-    worksheet.freeze_panes = "A2"
-    worksheet.row_dimensions[1].height = 20
-    worksheet.column_dimensions["A"].width = 20
-    worksheet.column_dimensions["B"].width = 30
-    worksheet.column_dimensions["C"].width = 15
-
-    highlight = NamedStyle(name="highlight")
-    highlight.font = Font(name="Times New Roman", bold=True, size=14)
-    bd = Side(style="thin", color="000000")
-    highlight.border = Border(left=bd, top=bd, right=bd, bottom=bd)
-    highlight.fill = PatternFill("solid", fgColor="FFFF00")
-    highlight.alignment = Alignment(horizontal="center", vertical="center")
-
-    worksheet["A1"].style = highlight
-    worksheet["B1"].style = highlight
-    worksheet["C1"].style = highlight
-    return workbook
-
-
-def generate_attendance_report(attendees):
-    workbook = create_workbook()
-    worksheet = workbook.active
-
-    for roll_num in attendees:
-        worksheet.append([roll_num, attendees[roll_num][0], attendees[roll_num][1]])
-
-    workbook.save(f'attendance-records/{datetime.now().strftime("%d-%m-%y (%I.%M-%p)")}.xlsx')
+    def change_appearance_mode_event(self, new_appearance_mode):
+        ctk.set_appearance_mode(new_appearance_mode)
 
 
 if __name__ == "__main__":
-    faces_queue = multiprocessing.Queue()
-    exit_flag = multiprocessing.Value("i", 0)
-    attendees = multiprocessing.Manager().dict()
-    status_code = multiprocessing.Manager().Value(str, "active")
-
-    detect_faces_process = multiprocessing.Process(
-        target=detect_faces,
-        args=(
-            faces_queue,
-            exit_flag,
-            status_code,
-        ),
-    )
-    detect_faces_process.start()
-
-    process_frame_process = multiprocessing.Process(
-        target=process_frame,
-        args=(
-            faces_queue,
-            exit_flag,
-            status_code,
-            attendees,
-        ),
-    )
-    process_frame_process.start()
-
-    detect_faces_process.join()
-    process_frame_process.join()
-
-    generate_attendance_report(attendees)
+    app = App()
+    app.mainloop()
+    # create_session()
