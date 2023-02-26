@@ -57,7 +57,10 @@ def process_frame(queue):
     known_face_encodings, known_face_names, known_face_roll = cache_database("Student_DB")
     counter = 0
     while True:
-        frame, face_locations = queue.get()
+        try:
+            frame, face_locations = queue.get(timeout=1)
+        except multiprocessing.queues.Empty:
+            continue
         face_encodings = face_recognition.face_encodings(frame, face_locations)
 
         for face_encoding in face_encodings:
