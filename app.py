@@ -1,7 +1,9 @@
 import os
 
+import tkinter as tk
+
 import customtkinter as ctk
-from PIL import Image
+from PIL import Image, ImageTk
 
 from core import create_session
 
@@ -9,13 +11,7 @@ ctk.set_default_color_theme("dark-blue")
 
 
 def show_attendance_records():
-    """
-    A simple function that opens the folder containing the attendance records.
-
-    :return: None
-    """
-
-    os.startfile('attendance-records')
+    os.startfile("attendance-records")
 
 
 class App(ctk.CTk):
@@ -57,7 +53,7 @@ class App(ctk.CTk):
         self.add_student_image = ctk.CTkImage(
             light_image=Image.open("assets/add-student-dark.png"),
             dark_image=Image.open("assets/add-student-light.png"),
-            size=(20, 20),
+            size=(180, 180),
         )
 
         # create navigation frame
@@ -105,7 +101,7 @@ class App(ctk.CTk):
         self.admin_button.grid(row=2, column=0, sticky="ew")
 
         self.appearance_mode_label = ctk.CTkLabel(
-            self.navigation_frame, text="Appearance Mode:", anchor="w"
+            self.navigation_frame, text="Appearance Mode:", anchor="s"
         )
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(5, 0))
 
@@ -119,6 +115,7 @@ class App(ctk.CTk):
         # create home frame
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)
+        self.home_frame.grid_rowconfigure(2, weight=1)
 
         self.start_new_session_button = ctk.CTkButton(
             self.home_frame,
@@ -128,8 +125,7 @@ class App(ctk.CTk):
             font=("Courier New", 20, "bold"),
             command=create_session,
         )
-        self.start_new_session_button.grid(row=3, column=0, padx=30, pady=20)
-        self.start_new_session_button.place(relx=0.5, rely=0.5, anchor="center")
+        self.start_new_session_button.grid(row=3, column=0, padx=30)
 
         self.show_attendance_records_button = ctk.CTkButton(
             self.home_frame,
@@ -139,24 +135,46 @@ class App(ctk.CTk):
             font=("Courier New", 20, "bold"),
             command=show_attendance_records,
         )
-        self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=20)
-        self.show_attendance_records_button.place(relx=0.5, rely=0.7, anchor="center")
+        self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=30)
 
         # create Admin frame
         self.admin_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.admin_frame.grid_columnconfigure(0, weight=1)
-        
+
         self.admin_tabview = ctk.CTkTabview(self.admin_frame, height=650, width=700)
-        self.admin_tabview.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.admin_tabview.add("Add Student")
+        self.admin_tabview.grid(
+            row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew"
+        )
+        self.add_student_tab = self.admin_tabview.add("Add Student")
         self.admin_tabview.add("View Students")
 
-        self.admin_tabview.tab("Add Student").grid_columnconfigure(0, weight=1)
-        self.admin_tabview.tab("View Students").grid_columnconfigure(0, weight=1)
+        self.add_student_tab.grid_columnconfigure(3, weight=1)
+        self.add_student_tab.grid_rowconfigure(3, weight=1)
 
+        self.add_student_image_frame = ctk.CTkFrame(
+            self.add_student_tab, fg_color="transparent"
+        )
+        self.add_student_image_frame.grid(row=0, rowspan=9, column=0, sticky="n")
+
+        self.add_student_image_label = ctk.CTkLabel(
+            self.add_student_image_frame, text="", image=self.add_student_image,
+        )
+        self.add_student_image_label.grid(row=0, column=0, ipadx=20, ipady=20)
+        ctk.CTkButton(
+            self.add_student_image_frame, text="Upload Image", width=150, height=40, command=self.upload_image_event
+        ).grid(row=1, column=0, padx=10, pady=10)
+
+        self.add_details_frame = ctk.CTkFrame(self.add_student_tab)
+        self.add_details_frame.grid(
+            row=0, column=3, rowspan=9, columnspan=2, sticky="nsew", padx=(20, 0)
+        )
+
+        self.add_student_button = ctk.CTkButton(self.add_student_tab, text="Add Student", width=160, height=50)
+        self.add_student_button.grid(row=9, rowspan=9, column=0, columnspan=6, padx=(0, 20), pady=20)
 
         # select default frame
-        self.select_frame_by_name("home")
+        # self.select_frame_by_name("home")
+        self.select_frame_by_name("admin")
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -185,6 +203,13 @@ class App(ctk.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
+
+    def upload_image_event(self):
+        file_path = tk.filedialog.askopenfilename(
+            initialdir="./", title="Select image", filetypes=[("Image Files", "*.jpg *.png *.jpeg")],
+        )
+        new_student_image = ctk.CTkImage(light_image=Image.open(file_path), size=(180, 180))
+        self.add_student_image_label.configure(image=new_student_image)
 
 
 if __name__ == "__main__":
