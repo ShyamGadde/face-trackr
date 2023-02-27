@@ -59,6 +59,8 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
             break
 
         IMG_BACKGROUND[120 : 120 + 480, 100 : 100 + 640] = frame
+        # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+        frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(frame)
 
         counter += 1
