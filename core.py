@@ -62,7 +62,7 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
         face_locations = face_recognition.face_locations(frame)
 
         counter += 1
-        if counter % 10 == 0:
+        if counter % 5 == 0:
             # Only send every tenth frame to the other process
             faces_queue.put((frame, face_locations))
 
