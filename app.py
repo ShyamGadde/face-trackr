@@ -180,11 +180,11 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(self.add_details_frame, text="Student ID:", font=("", 18)).grid(row=0, column=0, padx=(15, 2), pady=(70, 10))
         self.student_id_text = tk.StringVar()
-        self.student_id_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_id_text).grid(row=0, column=1, padx=(0, 10), pady=(70, 10))
+        self.student_id_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_id_text).grid(row=0, column=1, padx=(10, 10), pady=(70, 10))
 
         ctk.CTkLabel(self.add_details_frame, text="Full Name:", font=("", 18)).grid(row=1, column=0, padx=(15, 2), pady=10)
         self.student_name_text = tk.StringVar()
-        self.student_name_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_name_text).grid(row=1, column=1, padx=(0, 10), pady=10)
+        self.student_name_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_name_text).grid(row=1, column=1, padx=(10, 10), pady=10)
 
         self.student_image_filepath = ''
         self.add_student_button = ctk.CTkButton(self.add_student_tab, text="Add Student", width=160, height=50, command=self.add_student_button_event)
