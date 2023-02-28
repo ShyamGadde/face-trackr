@@ -29,12 +29,12 @@ class Database:
         self.cur.execute("DELETE FROM students WHERE id=?", (id,))
         self.conn.commit()
 
-    # def update(self, id, part, customer, retailer, price):
-    #     self.cur.execute(
-    #         "UPDATE parts SET part = ?, customer = ?, retailer = ?, price = ? WHERE id = ?",
-    #         (part, customer, retailer, price, id),
-    #     )
-    #     self.conn.commit()
+    def update_name(self, id, name):
+        self.cur.execute(
+            "UPDATE students SET name = ? WHERE id = ?",
+            (name, id),
+        )
+        self.conn.commit()
 
     def __del__(self):
         self.conn.close()
