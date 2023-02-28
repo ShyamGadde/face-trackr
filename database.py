@@ -14,7 +14,7 @@ class Database:
         self.cur.execute("SELECT * FROM students;")
         return self.cur.fetchall()
     
-    def fetch_id_and_name(self, id, name):
+    def fetch_id_and_name(self):
         self.cur.execute("SELECT id, name FROM students;")
         return self.cur.fetchall()
 
