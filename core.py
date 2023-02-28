@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import pickle
 import queue
 import threading
 import time
@@ -11,6 +12,7 @@ import face_recognition
 import numpy as np
 from cvzone import cornerRect
 
+from database import Database
 from excel import generate_attendance_report
 
 IMG_BACKGROUND = cv2.imread("assets/background.png")
@@ -36,20 +38,22 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
 
         while not exit_flag.value:
             try:
-                status, student_id, name, student_img = console_status_queue.get(timeout=0.1)
+                status, student_id, name, student_img = console_status_queue.get(
+                    timeout=0.1
+                )
                 first_name, last_name = name.split()
             except queue.Empty:
-                    continue
+                continue
 
             status_code = "present"
             time.sleep(1.5)
 
             status_code = status
             time.sleep(1)
-    
+
             status_code = "active"
             time.sleep(2)
-    
+
     threading.Thread(target=update_console_status).start()
 
     counter = 0
@@ -57,7 +61,7 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
     while True:
         ret, frame = cap.read()
 
-        if not ret: 
+        if not ret:
             break
 
         IMG_BACKGROUND[120 : 120 + 480, 100 : 100 + 640] = frame
@@ -72,22 +76,47 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
 
         for top, right, bottom, left in face_locations:
             cornerRect(
-                IMG_BACKGROUND, (100 + left, 120 + top, right - left, bottom - top), 
-                rt=0
+                IMG_BACKGROUND,
+                (100 + left, 120 + top, right - left, bottom - top),
+                rt=0,
             )
-        
-        IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code]
+
+        IMG_BACKGROUND[85 : 85 + 550, 820 : 820 + 370] = STATUS_IMG[status_code]
         if status_code == "present":
-            IMG_BACKGROUND[145:145 + 216, 896:896 + 216] = student_img
+            IMG_BACKGROUND[145 : 145 + 216, 896 : 896 + 216] = student_img
             (w, _), _ = cv2.getTextSize(first_name, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
             offset = 820 + (370 - w) // 2
-            cv2.putText(IMG_BACKGROUND, first_name, (offset, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(
+                IMG_BACKGROUND,
+                first_name,
+                (offset, 450),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                2,
+            )
 
             (w, _), _ = cv2.getTextSize(last_name, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
             offset = 820 + (370 - w) // 2
-            cv2.putText(IMG_BACKGROUND, last_name, (offset, 475), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(
+                IMG_BACKGROUND,
+                last_name,
+                (offset, 475),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                2,
+            )
 
-            cv2.putText(IMG_BACKGROUND, student_id, (975, 555), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(
+                IMG_BACKGROUND,
+                student_id,
+                (975, 555),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                2,
+            )
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
@@ -100,26 +129,36 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
     cv2.destroyAllWindows()
 
 
-def cache_database(path):
-    face_encodings = []
-    names = []
-    ids = []
-    student_imgs = []
-    for filename in os.listdir(path):
-        # Fix so that it doesn't read hidden files
-        if not filename.startswith("."):
-            img = cv2.imread(os.path.join(path, filename), cv2.COLOR_BGR2RGB)
-            student_imgs.append(img)
-            face_encodings.append(face_recognition.face_encodings(img)[0])
-            names.append(" ".join(filename.split("_")[1:]).split(".")[0].title())
-            ids.append(int(filename.split("_")[0]))
-    return face_encodings, ids, names, student_imgs
+def cache_database(database):
+    db = Database(database)
+    (
+        known_face_ids,
+        known_face_names,
+        known_student_imgs,
+        known_face_encodings,
+    ) = zip(*db.fetch())
+
+    known_student_imgs = tuple(
+        map(
+            lambda buffer: cv2.imdecode(
+                np.frombuffer(buffer, np.uint8), cv2.IMREAD_COLOR
+            ),
+            known_student_imgs,
+        )
+    )
+
+    known_face_encodings = tuple(map(pickle.loads, known_face_encodings))
+
+    return known_face_ids, known_face_names, known_student_imgs, known_face_encodings
 
 
 def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
-    known_face_encodings, known_face_ids, known_face_names, known_student_imgs = cache_database(
-        "Student_DB"
-    )
+    (
+        known_face_ids,
+        known_face_names,
+        known_student_imgs,
+        known_face_encodings,
+    ) = cache_database("student.db")
     previous_two = deque([None, None], maxlen=2)
 
     while True:
@@ -130,7 +169,7 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
                 break
             else:
                 continue
-        
+
         face_encodings = face_recognition.face_encodings(frame, face_locations)
 
         for face_encoding in face_encodings:
@@ -156,9 +195,8 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
                 if student_id not in attendees:
                     status = "marked"
                     attendees[student_id] = (name, datetime.now().strftime("%I:%M %p"))
-                
-                console_status_queue.put((status, str(student_id), name, student_img))
 
+                console_status_queue.put((status, str(student_id), name, student_img))
 
 
 def create_session():
