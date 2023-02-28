@@ -13,9 +13,6 @@ from PIL import Image
 
 from core import create_session
 
-ctk.set_default_color_theme("dark-blue")
-
-
 def show_attendance_records():
     os.startfile("attendance-records")
 
@@ -256,5 +253,6 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
+    ctk.set_default_color_theme("dark-blue")
     app = App()
     app.mainloop()
