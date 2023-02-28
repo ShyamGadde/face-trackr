@@ -229,6 +229,11 @@ class App(ctk.CTk):
         self.student_image.configure(image=new_student_image)
 
     def add_student_button_event(self):
+        # Check if all fields are filled
+        if self.student_id_text.get() == '' or self.student_name_text.get() == '' or self.student_image_filepath == '':
+            messagebox.showerror("Error", "Please fill all the fields")
+            return
+        
         img = cv2.imread(self.student_image_filepath, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (216, 216))
         face_encoding = face_encodings(img)[0]
