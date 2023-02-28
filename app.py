@@ -380,8 +380,8 @@ class App(ctk.CTk):
             return
 
         img = cv2.imread(self.student_image_filepath, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (216, 216))
         face_encoding = face_encodings(img)[0]
+        img = cv2.resize(img, (216, 216))
 
         # Convert img and face_encoding to bytes
         img_bytes = cv2.imencode(".jpg", img)[1].tobytes()
