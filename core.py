@@ -28,19 +28,21 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
     cap.set(4, 480)
     student_img = None
     status_code = "active"
+    student_id = ""
+    first_name = last_name = ""
 
     def update_console_status():
-        nonlocal status_code
-        nonlocal student_img
+        nonlocal status_code, student_img, student_id, first_name, last_name
 
         while not exit_flag.value:
             try:
                 status, student_id, name, student_img = console_status_queue.get(timeout=0.1)
+                first_name, last_name = name.split()
             except queue.Empty:
                     continue
 
             status_code = "present"
-            time.sleep(1)
+            time.sleep(1.5)
 
             status_code = status
             time.sleep(1)
@@ -77,6 +79,15 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
         IMG_BACKGROUND[85:85 + 550, 820:820 + 370] = STATUS_IMG[status_code]
         if status_code == "present":
             IMG_BACKGROUND[145:145 + 216, 896:896 + 216] = student_img
+            (w, _), _ = cv2.getTextSize(first_name, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+            offset = 820 + (370 - w) // 2
+            cv2.putText(IMG_BACKGROUND, first_name, (offset, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            (w, _), _ = cv2.getTextSize(last_name, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+            offset = 820 + (370 - w) // 2
+            cv2.putText(IMG_BACKGROUND, last_name, (offset, 475), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            cv2.putText(IMG_BACKGROUND, student_id, (975, 555), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         cv2.imshow("Camera", IMG_BACKGROUND)
         cv2.waitKey(1)
@@ -146,7 +157,7 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
                     status = "marked"
                     attendees[student_id] = (name, datetime.now().strftime("%I:%M %p"))
                 
-                console_status_queue.put((status, student_id, name, student_img))
+                console_status_queue.put((status, str(student_id), name, student_img))
 
 
 
