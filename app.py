@@ -1,9 +1,8 @@
 import os
-
 import tkinter as tk
 
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image
 
 from core import create_session
 
@@ -148,13 +147,14 @@ class App(ctk.CTk):
         self.add_student_tab = self.admin_tabview.add("Add Student")
         self.admin_tabview.add("View Students")
 
+        # Add Student Tab
         self.add_student_tab.grid_columnconfigure(3, weight=1)
         self.add_student_tab.grid_rowconfigure(3, weight=1)
 
         self.add_student_image_frame = ctk.CTkFrame(
             self.add_student_tab, fg_color="transparent"
         )
-        self.add_student_image_frame.grid(row=0, rowspan=9, column=0, sticky="n")
+        self.add_student_image_frame.grid(row=0, rowspan=4, column=0, sticky="n")
 
         self.add_student_image_label = ctk.CTkLabel(
             self.add_student_image_frame, text="", image=self.add_student_image,
@@ -164,13 +164,25 @@ class App(ctk.CTk):
             self.add_student_image_frame, text="Upload Image", width=150, height=40, command=self.upload_image_event
         ).grid(row=1, column=0, padx=10, pady=10)
 
-        self.add_details_frame = ctk.CTkFrame(self.add_student_tab)
-        self.add_details_frame.grid(
-            row=0, column=3, rowspan=9, columnspan=2, sticky="nsew", padx=(20, 0)
-        )
 
-        self.add_student_button = ctk.CTkButton(self.add_student_tab, text="Add Student", width=160, height=50)
-        self.add_student_button.grid(row=9, rowspan=9, column=0, columnspan=6, padx=(0, 20), pady=20)
+        self.add_details_frame = ctk.CTkFrame(self.add_student_tab, fg_color="transparent")
+        self.add_details_frame.grid(
+            row=0, column=3, rowspan=5, columnspan=2, sticky="nsew", padx=(20, 0)
+        )
+        self.add_details_frame.grid_columnconfigure(0, weight=1)
+        self.add_details_frame.grid_columnconfigure(1, weight=3)
+
+        ctk.CTkLabel(self.add_details_frame, text="Student ID:", font=("", 18)).grid(row=0, column=0, padx=(15, 2), pady=(70, 10))
+        self.student_id_text = tk.StringVar()
+        self.student_id_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_id_text).grid(row=0, column=1, padx=(0, 10), pady=(70, 10))
+
+        ctk.CTkLabel(self.add_details_frame, text="Full Name:", font=("", 18)).grid(row=1, column=0, padx=(15, 2), pady=10)
+        self.student_name_text = tk.StringVar()
+        self.student_name_entry = ctk.CTkEntry(self.add_details_frame, width=400, textvariable=self.student_name_text).grid(row=1, column=1, padx=(0, 10), pady=10)
+
+        self.student_image_file = ''
+        self.add_student_button = ctk.CTkButton(self.add_student_tab, text="Add Student", width=160, height=50, command=self.add_student_event)
+        self.add_student_button.grid(row=9, column=0, columnspan=6, padx=(0, 20), pady=20)
 
         # select default frame
         # self.select_frame_by_name("home")
@@ -205,11 +217,19 @@ class App(ctk.CTk):
         ctk.set_appearance_mode(new_appearance_mode)
 
     def upload_image_event(self):
-        file_path = tk.filedialog.askopenfilename(
+        self.student_image_file = tk.filedialog.askopenfilename(
             initialdir="./", title="Select image", filetypes=[("Image Files", "*.jpg *.png *.jpeg")],
         )
-        new_student_image = ctk.CTkImage(light_image=Image.open(file_path), size=(180, 180))
+        new_student_image = ctk.CTkImage(light_image=Image.open(self.student_image_file), size=(180, 180))
         self.add_student_image_label.configure(image=new_student_image)
+
+    def add_student_event(self):
+        print(self.student_id_text.get())
+        print(self.student_name_text.get())
+        print(self.student_image_file)
+        self.student_id_text.set('')
+        self.student_name_text.set('')
+        self.add_student_image_label.configure(image=self.add_student_image)
 
 
 if __name__ == "__main__":
