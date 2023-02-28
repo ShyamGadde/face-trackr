@@ -13,6 +13,10 @@ class Database:
     def fetch(self):
         self.cur.execute("SELECT * FROM students")
         return self.cur.fetchall()
+    
+    def fetch(self, id, name):
+        self.cur.execute("SELECT * FROM students WHERE id = ? AND name = ?", (id, name))
+        return self.cur.fetchall()
 
     def insert(self, id, name, image, face_encoding):
         self.cur.execute(
