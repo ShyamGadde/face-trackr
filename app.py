@@ -317,12 +317,12 @@ class App(ctk.CTk):
 
         # Add buttons to update and delete student
         self.update_student_button = ctk.CTkButton(
-            self.manage_students_tab, text="Update Student Record", width=160, height=50
+            self.manage_students_tab, text="Update Student Record", width=160, height=50, command=self.update_student_button_event
         )
         self.update_student_button.grid(row=2, column=0, padx=(20, 20), pady=20)
 
         self.delete_student_button = ctk.CTkButton(
-            self.manage_students_tab, text="Delete Student Record", width=160, height=50
+            self.manage_students_tab, text="Delete Student Record", width=160, height=50, command=self.delete_student_button_event
         )
         self.delete_student_button.grid(row=2, column=1, padx=(20, 20), pady=20)
 
@@ -439,7 +439,12 @@ class App(ctk.CTk):
         pass
 
     def delete_student_button_event(self):
-        pass
+        id, name = self.student_treeview.item(self.student_treeview.focus(), 'values')
+        if messagebox.askyesno("Delete Student", f"Are you sure you want to delete {name} ({id})?"):
+            db = Database("student.db")
+            db.remove(id)
+            del db
+            self.populate_treeview()
 
 
 if __name__ == "__main__":

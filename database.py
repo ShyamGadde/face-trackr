@@ -25,9 +25,9 @@ class Database:
         )
         self.conn.commit()
 
-    # def remove(self, id):
-    #     self.cur.execute("DELETE FROM parts WHERE id=?", (id,))
-    #     self.conn.commit()
+    def remove(self, id):
+        self.cur.execute("DELETE FROM students WHERE id=?", (id,))
+        self.conn.commit()
 
     # def update(self, id, part, customer, retailer, price):
     #     self.cur.execute(
