@@ -6,21 +6,21 @@ class Database:
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
         self.cur.execute(
-            "CREATE TABLE IF NOT EXISTS students (id TEXT PRIMARY KEY, name TEXT, image BLOB, face_encoding BLOB)"
+            "CREATE TABLE IF NOT EXISTS students (id TEXT PRIMARY KEY, name TEXT, image BLOB, face_encoding BLOB);"
         )
         self.conn.commit()
 
     def fetch(self):
-        self.cur.execute("SELECT * FROM students")
+        self.cur.execute("SELECT * FROM students;")
         return self.cur.fetchall()
     
-    def fetch(self, id, name):
-        self.cur.execute("SELECT * FROM students WHERE id = ? AND name = ?", (id, name))
+    def fetch_id_and_name(self, id, name):
+        self.cur.execute("SELECT id, name FROM students;")
         return self.cur.fetchall()
 
     def insert(self, id, name, image, face_encoding):
         self.cur.execute(
-            "INSERT INTO students VALUES (?, ?, ?, ?)",
+            "INSERT INTO students VALUES (?, ?, ?, ?);",
             (id, name, image, face_encoding),
         )
         self.conn.commit()
