@@ -115,9 +115,7 @@ class App(ctk.CTk):
         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
 
         # Create home frame
-        self.home_frame = ctk.CTkFrame(
-            self, corner_radius=20
-        )
+        self.home_frame = ctk.CTkFrame(self, corner_radius=20)
         self.home_frame.grid_columnconfigure(0, weight=1)
         self.home_frame.grid_rowconfigure(0, weight=1)
 
@@ -220,7 +218,102 @@ class App(ctk.CTk):
         self.manage_students_tab.grid_rowconfigure(0, weight=1)
 
         # Create Treeview
-        self.student_treeview = ttk.Treeview()
+        self.style = ttk.Style()
+        self.style.theme_use("default")
+        self.style.configure(
+            "Treeview",
+            background="#212121",
+            foreground="#cee5e5",
+            rowheight=50,
+            fieldbackground="#212121",
+            font=("Helvetica", 13),
+        )
+        self.style.map(
+            "Treeview",
+            background=[("selected", "gray70")],
+            foreground=[("selected", "black")],
+        )
+
+        self.tree_frame = ctk.CTkFrame(self.manage_students_tab)
+        self.tree_frame.grid(
+            row=0, column=0, columnspan=2, sticky="nsew", padx=(20, 20), pady=(20, 0)
+        )
+        self.tree_frame.grid_columnconfigure(0, weight=1)
+        self.tree_frame.grid_rowconfigure(0, weight=1)
+
+        self.style.configure(
+            "Vertical.TScrollbar",
+            troughcolor="#303030",
+            gripcount=0,
+            background="#505050",
+            darkcolor="#303030",
+            lightcolor="#505050",
+            troughrelief="flat",
+            arrowcolor="white",
+        )
+
+        self.style.map(
+            "Vertical.TScrollbar",
+            background=[
+                ("active", "#424242"),
+                ("disabled", "#424242"),
+            ],
+            darkcolor=[
+                ("disabled", "#424242"),
+            ],
+            lightcolor=[
+                ("disabled", "#424242"),
+            ],
+            troughcolor=[
+                ("disabled", "#212121"),
+            ],
+            arrowcolor=[
+                ("active", "white"), 
+                ("disabled", "white"),
+            ],
+        )
+        self.tree_scrollbar = ttk.Scrollbar(self.tree_frame, orient="vertical")
+        self.tree_scrollbar.grid(row=0, column=1, sticky="ns")
+
+        self.student_treeview = ttk.Treeview(
+            self.tree_frame,
+            yscrollcommand=self.tree_scrollbar.set,
+            selectmode="extended",
+        )
+        self.student_treeview.grid(row=0, column=0, sticky="nsew")
+        self.tree_scrollbar.config(command=self.student_treeview.yview)
+
+        self.student_treeview["columns"] = ("Student ID", "Name")
+        self.student_treeview.column("#0", width=0, stretch="no")
+        self.student_treeview.column("Student ID", anchor="center", stretch=True)
+        self.student_treeview.column("Name", anchor="w", stretch=True)
+
+        self.style.configure(
+            "Treeview.Heading", font=("Helvetica", 16), padding=(10, 10), background="#505050", foreground="white"
+        )
+        self.style.map(
+            "Treeview.Heading",
+            background=[("hover", "#505050")],
+        )
+        self.student_treeview.heading("#0", text="", anchor="w")
+        self.student_treeview.heading("Student ID", text="Student ID", anchor="center")
+        self.student_treeview.heading("Name", text="Name", anchor="w")
+
+        self.student_treeview.tag_configure("oddrow", background="gray10")
+        self.student_treeview.tag_configure("evenrow", background="#212121")
+
+        self.populate_treeview()
+
+        # for i in range(100):
+        #     self.student_treeview.insert(
+        #         "",
+        #         "end",
+        #         text="",
+        #         values=(
+        #             f"Student ID {i}",
+        #             f"Student Name {i}",
+        #         ),
+        #     )
 
         # Add buttons to update and delete student
         self.update_student_button = ctk.CTkButton(
@@ -311,6 +404,42 @@ class App(ctk.CTk):
         self.student_id_text.set("")
         self.student_name_text.set("")
         self.student_image.configure(image=self.student_img_placeholder)
+
+        # Update treeview
+        self.populate_treeview()
+
+    def populate_treeview(self):
+        # Clear treeview
+        self.student_treeview.delete(*self.student_treeview.get_children())
+
+        # Get all students from database
+        db = Database("student.db")
+        for count, student in enumerate(db.fetch_id_and_name()):
+            if not count % 2:
+                self.student_treeview.insert(
+                    parent="",
+                    index="end",
+                    iid=count,
+                    text="",
+                    values=student,
+                    tags=("evenrow",),
+                )
+            else:
+                self.student_treeview.insert(
+                    parent="",
+                    index="end",
+                    iid=count,
+                    text="",
+                    values=student,
+                    tags=("oddrow",),
+                )
+        del db
+
+    def update_student_button_event(self):
+        pass
+
+    def delete_student_button_event(self):
+        pass
 
 
 if __name__ == "__main__":
