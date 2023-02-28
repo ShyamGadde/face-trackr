@@ -1,9 +1,14 @@
 import os
+import pickle
 import time
 import tkinter as tk
 from tkinter import messagebox
 
+from database import Database
+
 import customtkinter as ctk
+import cv2
+import face_recognition
 from PIL import Image
 
 from core import create_session
@@ -228,15 +233,23 @@ class App(ctk.CTk):
         self.student_image.configure(image=new_student_image)
 
     def add_student_button_event(self):
-        print(self.student_id_text.get())
-        print(self.student_name_text.get())
-        print(self.student_image_filepath)
+        img = cv2.imread(self.student_image_filepath, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (216, 216))
+        face_encoding = face_recognition.face_encodings(img)[0]
+
+        # Convert img and face_encoding to bytes
+        img_bytes = cv2.imencode('.jpg', img)[1].tobytes()
+        face_encoding_bytes = pickle.dumps(face_encoding)
+
+        # Insert student into database
+        db = Database("student.db")
+        db.insert(self.student_id_text.get(), self.student_name_text.get(), img_bytes, face_encoding_bytes)
+        del db
         
         # Show success message
         messagebox.showinfo("Success", "Student added successfully")
 
         # Reset fields
-        time.sleep(0.01)
         self.student_id_text.set('')
         self.student_name_text.set('')
         self.student_image.configure(image=self.student_img_placeholder)
