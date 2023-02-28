@@ -459,7 +459,10 @@ class App(ctk.CTk):
                 self.update_window.focus()  # if window exists focus it
 
             self.update_window.title("Update Student")
-            self.update_window.geometry("400x150")
+            self.update_win_x = (self.screen_width / 2) - (400 / 2)
+            self.update_win_y = (self.screen_height / 2) - (150 / 2)
+
+            self.update_window.geometry(f"400x150+{int(self.update_win_x)}+{int(self.update_win_y)}")
             self.update_window.grid_columnconfigure(0, weight=1)
             self.update_window.grid_columnconfigure(1, weight=5)
             self.update_window.grid_rowconfigure(3, weight=1)
@@ -489,9 +492,17 @@ class App(ctk.CTk):
 
             # Update Button
             self.update_student_button = ctk.CTkButton(
-                self.update_window, text="Update Record",
+                self.update_window, text="Update Record", command=self.update_student_name
             )
             self.update_student_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+
+    # def update_student_name(self):
+    #     # db = Database("student.db")
+    #     # db.update(id, name)
+    #     # del db
+    #     # self.populate_treeview()
+    #     print(self.update_student_name_entry.get())
+    #     self.update_window.destroy()
 
     def delete_student_button_event(self):  # sourcery skip: use-named-expression
         selection = self.student_treeview.focus()
