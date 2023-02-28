@@ -436,15 +436,18 @@ class App(ctk.CTk):
         del db
 
     def update_student_button_event(self):
-        pass
-
-    def delete_student_button_event(self):
         id, name = self.student_treeview.item(self.student_treeview.focus(), 'values')
-        if messagebox.askyesno("Delete Student", f"Are you sure you want to delete {name} ({id})?"):
-            db = Database("student.db")
-            db.remove(id)
-            del db
-            self.populate_treeview()
+        
+
+    def delete_student_button_event(self):  # sourcery skip: use-named-expression
+        selection = self.student_treeview.focus()
+        if selection:
+            id, name = self.student_treeview.item(selection, 'values')
+            if messagebox.askyesno("Delete Student", f"Are you sure you want to delete {name} ({id})?"):
+                db = Database("student.db")
+                db.remove(id)
+                del db
+                self.populate_treeview()
 
 
 if __name__ == "__main__":
