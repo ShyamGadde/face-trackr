@@ -1,20 +1,19 @@
-import os
 import pickle
-import time
 import tkinter as tk
+from os import startfile
 from tkinter import messagebox
-
-from database import Database
 
 import customtkinter as ctk
 import cv2
-import face_recognition
+from face_recognition import face_encodings
 from PIL import Image
 
 from core import create_session
+from database import Database
+
 
 def show_attendance_records():
-    os.startfile("attendance-records")
+    startfile("attendance-records")
 
 
 class App(ctk.CTk):
@@ -232,7 +231,7 @@ class App(ctk.CTk):
     def add_student_button_event(self):
         img = cv2.imread(self.student_image_filepath, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (216, 216))
-        face_encoding = face_recognition.face_encodings(img)[0]
+        face_encoding = face_encodings(img)[0]
 
         # Convert img and face_encoding to bytes
         img_bytes = cv2.imencode('.jpg', img)[1].tobytes()

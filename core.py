@@ -1,16 +1,15 @@
-import multiprocessing
-import os
 import pickle
-import queue
-import threading
-import time
 from collections import deque
 from datetime import datetime
+from multiprocessing import Manager, Process, Queue, Value
+from queue import Empty
+from threading import Thread
+from time import sleep
 
 import cv2
 import face_recognition
-import numpy as np
 from cvzone import cornerRect
+from numpy import argmin, frombuffer, uint8
 
 from database import Database
 from excel import generate_attendance_report
@@ -42,19 +41,19 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
                     timeout=0.1
                 )
                 first_name, last_name = name.split()
-            except queue.Empty:
+            except Empty:
                 continue
 
             status_code = "present"
-            time.sleep(1.5)
+            sleep(1.5)
 
             status_code = status
-            time.sleep(1)
+            sleep(1)
 
             status_code = "active"
-            time.sleep(2)
+            sleep(2)
 
-    threading.Thread(target=update_console_status).start()
+    Thread(target=update_console_status).start()
 
     counter = 0
 
@@ -143,7 +142,7 @@ def cache_database(database):
     known_student_imgs = tuple(
         map(
             lambda buffer: cv2.imdecode(
-                np.frombuffer(buffer, np.uint8), cv2.IMREAD_COLOR
+                frombuffer(buffer, uint8), cv2.IMREAD_COLOR
             ),
             known_student_imgs,
         )
@@ -166,7 +165,7 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
     while True:
         try:
             frame, face_locations = faces_queue.get(timeout=1)
-        except queue.Empty:
+        except Empty:
             if exit_flag.value:
                 break
             else:
@@ -182,7 +181,7 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
             face_distances = face_recognition.face_distance(
                 known_face_encodings, face_encoding
             )
-            best_match_index = np.argmin(face_distances)
+            best_match_index = argmin(face_distances)
             if matches[best_match_index]:
                 status = "already_marked"
                 name = known_face_names[best_match_index]
@@ -202,12 +201,12 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
 
 
 def create_session():
-    faces_queue = multiprocessing.Queue()
-    console_status_queue = multiprocessing.Queue()
-    exit_flag = multiprocessing.Value("i", 0)
-    attendees = multiprocessing.Manager().dict()
+    faces_queue = Queue()
+    console_status_queue = Queue()
+    exit_flag = Value("i", 0)
+    attendees = Manager().dict()
 
-    detect_faces_process = multiprocessing.Process(
+    detect_faces_process = Process(
         target=detect_faces,
         args=(
             faces_queue,
@@ -217,7 +216,7 @@ def create_session():
     )
     detect_faces_process.start()
 
-    process_frame_process = multiprocessing.Process(
+    process_frame_process = Process(
         target=process_frame,
         args=(
             faces_queue,
@@ -234,7 +233,7 @@ def create_session():
     while console_status_queue.qsize() > 0:
         try:
             console_status_queue.get()
-        except queue.Empty:
+        except Empty:
             break
 
     process_frame_process.join()
