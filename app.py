@@ -1,7 +1,7 @@
 import os
 import time
 import tkinter as tk
-from tkinter.messagebox import showinfo
+from tkinter import messagebox
 
 import customtkinter as ctk
 from PIL import Image
@@ -233,7 +233,7 @@ class App(ctk.CTk):
         print(self.student_image_filepath)
         
         # Show success message
-        showinfo("Success", "Student added successfully")
+        messagebox.showinfo("Success", "Student added successfully")
 
         # Reset fields
         time.sleep(0.01)
