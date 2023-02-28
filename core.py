@@ -138,6 +138,8 @@ def cache_database(database):
         known_face_encodings,
     ) = zip(*db.fetch())
 
+    del db
+
     known_student_imgs = tuple(
         map(
             lambda buffer: cv2.imdecode(
