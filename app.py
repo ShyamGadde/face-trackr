@@ -268,7 +268,7 @@ class App(ctk.CTk):
                 ("disabled", "#212121"),
             ],
             arrowcolor=[
-                ("active", "white"), 
+                ("active", "white"),
                 ("disabled", "white"),
             ],
         )
@@ -289,7 +289,11 @@ class App(ctk.CTk):
         self.student_treeview.column("Name", anchor="w", stretch=True)
 
         self.style.configure(
-            "Treeview.Heading", font=("Helvetica", 16), padding=(10, 10), background="#505050", foreground="white"
+            "Treeview.Heading",
+            font=("Helvetica", 16),
+            padding=(10, 10),
+            background="#505050",
+            foreground="white",
         )
         self.style.map(
             "Treeview.Heading",
@@ -317,12 +321,20 @@ class App(ctk.CTk):
 
         # Add buttons to update and delete student
         self.update_student_button = ctk.CTkButton(
-            self.manage_students_tab, text="Update Student Record", width=160, height=50, command=self.update_student_button_event
+            self.manage_students_tab,
+            text="Update Student Record",
+            width=160,
+            height=50,
+            command=self.update_student_button_event,
         )
         self.update_student_button.grid(row=2, column=0, padx=(20, 20), pady=20)
 
         self.delete_student_button = ctk.CTkButton(
-            self.manage_students_tab, text="Delete Student Record", width=160, height=50, command=self.delete_student_button_event
+            self.manage_students_tab,
+            text="Delete Student Record",
+            width=160,
+            height=50,
+            command=self.delete_student_button_event,
         )
         self.delete_student_button.grid(row=2, column=1, padx=(20, 20), pady=20)
 
@@ -435,15 +447,59 @@ class App(ctk.CTk):
                 )
         del db
 
-    def update_student_button_event(self):
-        id, name = self.student_treeview.item(self.student_treeview.focus(), 'values')
-        
+    def update_student_button_event(self):  # sourcery skip: use-named-expression
+        selection = self.student_treeview.focus()
+        if selection:
+            id, name = self.student_treeview.item(selection, "values")
+            self.update_window = None
+            if self.update_window is None or not self.toplevel_window.winfo_exists():
+                # create window if its None or destroyed
+                self.update_window = ctk.CTkToplevel(self)
+            else:
+                self.update_window.focus()  # if window exists focus it
+
+            self.update_window.title("Update Student")
+            self.update_window.geometry("400x150")
+            self.update_window.grid_columnconfigure(0, weight=1)
+            self.update_window.grid_columnconfigure(1, weight=5)
+            self.update_window.grid_rowconfigure(3, weight=1)
+
+            # Student ID
+            self.update_student_id_label = ctk.CTkLabel(
+                self.update_window, text="Student ID:"
+            )
+            self.update_student_id_label.grid(row=0, column=0, padx=10, pady=10)
+
+            self.update_student_id_entry = ctk.CTkEntry(
+                self.update_window,
+                textvariable=tk.StringVar(value=id),
+                state="disabled",
+            )
+            self.update_student_id_entry.grid(row=0, column=1, padx=10, pady=10)
+
+            # Student Name
+            self.update_student_name_label = ctk.CTkLabel(
+                self.update_window, text="Student Name:"
+            )
+            self.update_student_name_label.grid(row=1, column=0, padx=10, pady=10)
+            self.update_student_name_entry = ctk.CTkEntry(
+                self.update_window, textvariable=tk.StringVar(value=name)
+            )
+            self.update_student_name_entry.grid(row=1, column=1, padx=10, pady=10)
+
+            # Update Button
+            self.update_student_button = ctk.CTkButton(
+                self.update_window, text="Update Record",
+            )
+            self.update_student_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
     def delete_student_button_event(self):  # sourcery skip: use-named-expression
         selection = self.student_treeview.focus()
         if selection:
-            id, name = self.student_treeview.item(selection, 'values')
-            if messagebox.askyesno("Delete Student", f"Are you sure you want to delete {name} ({id})?"):
+            id, name = self.student_treeview.item(selection, "values")
+            if messagebox.askyesno(
+                "Delete Student", f"Are you sure you want to delete {name} ({id})?"
+            ):
                 db = Database("student.db")
                 db.remove(id)
                 del db
