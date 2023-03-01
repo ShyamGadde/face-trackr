@@ -1,7 +1,6 @@
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, NamedStyle, PatternFill, Side
-from typing import Dict
 
 def create_workbook():
     """
