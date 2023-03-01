@@ -45,12 +45,12 @@ class App(ctk.CTk):
             Image.open("assets/CustomTkinter_logo_single.png"),
             size=(26, 26),
         )
-        self.home_image = ctk.CTkImage(
+        self.home_icon = ctk.CTkImage(
             light_image=Image.open("assets/home-dark.png"),
             dark_image=Image.open("assets/home-light.png"),
             size=(20, 20),
         )
-        self.admin_image = ctk.CTkImage(
+        self.admin_icon = ctk.CTkImage(
             light_image=Image.open("assets/admin-dark.png"),
             dark_image=Image.open("assets/admin-light.png"),
             size=(20, 20),
@@ -66,14 +66,13 @@ class App(ctk.CTk):
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(4, weight=1)
 
-        self.navigation_frame_label = ctk.CTkLabel(
+        ctk.CTkLabel(
             self.navigation_frame,
             text="  FaceTrackr",
             image=self.logo_image,
             compound="left",
             font=ctk.CTkFont(size=15, weight="bold"),
-        )
-        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
+        ).grid(row=0, column=0, padx=20, pady=20)
 
         self.home_button = ctk.CTkButton(
             self.navigation_frame,
@@ -84,7 +83,7 @@ class App(ctk.CTk):
             fg_color="transparent",
             text_color=("gray10", "gray90"),
             hover_color=("gray70", "gray30"),
-            image=self.home_image,
+            image=self.home_icon,
             anchor="w",
             command=self.home_button_event,
         )
@@ -99,48 +98,44 @@ class App(ctk.CTk):
             fg_color="transparent",
             text_color=("gray10", "gray90"),
             hover_color=("gray70", "gray30"),
-            image=self.admin_image,
+            image=self.admin_icon,
             anchor="w",
             command=self.admin_button_event,
         )
         self.admin_button.grid(row=2, column=0, sticky="ew")
 
-        self.appearance_mode_label = ctk.CTkLabel(
+        ctk.CTkLabel(
             self.navigation_frame, text="Appearance Mode:", anchor="s"
-        )
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(5, 0))
+        ).grid(row=5, column=0, padx=20, pady=(5, 0))
 
-        self.appearance_mode_menu = ctk.CTkOptionMenu(
+        ctk.CTkOptionMenu(
             self.navigation_frame,
             values=["Dark", "Light", "System"],
             command=self.change_appearance_mode_event,
-        )
-        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
+        ).grid(row=6, column=0, padx=20, pady=20, sticky="s")
 
         # Create home frame
         self.home_frame = ctk.CTkFrame(self, corner_radius=20)
         self.home_frame.grid_columnconfigure(0, weight=1)
         self.home_frame.grid_rowconfigure(0, weight=1)
 
-        self.start_new_session_button = ctk.CTkButton(
+        ctk.CTkButton(
             self.home_frame,
             text="Start New Session",
             width=300,
             height=100,
             font=("Courier New", 20, "bold"),
             command=create_session,
-        )
-        self.start_new_session_button.grid(row=3, column=0, padx=30)
+        ).grid(row=3, column=0, padx=30)
 
-        self.show_attendance_records_button = ctk.CTkButton(
+        ctk.CTkButton(
             self.home_frame,
             text="Show Attendance Records",
             width=300,
             height=100,
             font=("Courier New", 20, "bold"),
             command=show_attendance_records,
-        )
-        self.show_attendance_records_button.grid(row=4, column=0, padx=30, pady=30)
+        ).grid(row=4, column=0, padx=30, pady=30)
 
         # Create Admin frame
         self.admin_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -169,6 +164,7 @@ class App(ctk.CTk):
             self.student_image_frame, text="", image=self.student_img_placeholder
         )
         self.student_image.grid(row=0, column=0, ipadx=20, ipady=20)
+
         ctk.CTkButton(
             self.student_image_frame,
             text="Upload Image",
@@ -191,7 +187,7 @@ class App(ctk.CTk):
             row=0, column=0, padx=(15, 2), pady=(70, 10)
         )
         self.student_id_text = tk.StringVar()
-        self.student_id_entry = ctk.CTkEntry(
+        ctk.CTkEntry(
             self.add_details_frame, width=400, textvariable=self.student_id_text
         ).grid(row=0, column=1, padx=(10, 10), pady=(70, 10))
 
@@ -199,19 +195,18 @@ class App(ctk.CTk):
             row=1, column=0, padx=(15, 2), pady=10
         )
         self.student_name_text = tk.StringVar()
-        self.student_name_entry = ctk.CTkEntry(
+        ctk.CTkEntry(
             self.add_details_frame, width=400, textvariable=self.student_name_text
         ).grid(row=1, column=1, padx=(10, 10), pady=10)
 
         self.student_image_filepath = ""
-        self.add_student_button = ctk.CTkButton(
+        ctk.CTkButton(
             self.add_student_tab,
             text="Add Student",
             width=160,
             height=50,
             command=self.add_student_button_event,
-        )
-        self.add_student_button.grid(
+        ).grid(
             row=9, column=0, columnspan=6, padx=(0, 20), pady=20
         )
 
@@ -306,29 +301,27 @@ class App(ctk.CTk):
         self.student_treeview.heading("Student ID", text="Student ID", anchor="center")
         self.student_treeview.heading("Name", text="Name", anchor="w")
 
-        self.student_treeview.tag_configure("oddrow", background="gray10")
-        self.student_treeview.tag_configure("evenrow", background="#212121")
+        self.student_treeview.tag_configure("oddrow", background="#212121")
+        self.student_treeview.tag_configure("evenrow", background="gray10")
 
         self.populate_treeview()
 
         # Add buttons to update and delete student
-        self.update_student_button = ctk.CTkButton(
+        ctk.CTkButton(
             self.manage_students_tab,
             text="Update Student Record",
             width=160,
             height=50,
             command=self.update_student_record,
-        )
-        self.update_student_button.grid(row=2, column=0, padx=(20, 20), pady=20)
+        ).grid(row=2, column=0, padx=(20, 20), pady=20)
 
-        self.delete_student_button = ctk.CTkButton(
+        ctk.CTkButton(
             self.manage_students_tab,
             text="Delete Student Record",
             width=160,
             height=50,
             command=self.delete_student_record,
-        )
-        self.delete_student_button.grid(row=2, column=1, padx=(20, 20), pady=20)
+        ).grid(row=2, column=1, padx=(20, 20), pady=20)
 
         # select default frame
         self.select_frame_by_name("home")
