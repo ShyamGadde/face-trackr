@@ -14,6 +14,9 @@ from database import Database
 
 
 def show_attendance_records():
+    """
+    It opens the attendance records folder.
+    """
     startfile("attendance-records")
 
 
