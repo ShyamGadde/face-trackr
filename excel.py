@@ -1,6 +1,7 @@
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, NamedStyle, PatternFill, Side
+from typing import Dict
 
 def create_workbook():
     """
@@ -30,13 +31,12 @@ def create_workbook():
     return workbook
 
 
-def generate_attendance_report(attendees: dict):
+def generate_attendance_report(attendees):
     """
-    It takes a dictionary of students and their attendance records, and creates an Excel file with the
-    attendance records
+    It takes a dictionary of attendees and creates an excel file with the attendance records
     
-    :param attendees: dict
-    :type attendees: dict
+    :param attendees: A dictionary containing the roll numbers of the students who attended the class as
+    keys and a list with their names and corresponding attendance timestamps in that order as values
     """
     workbook = create_workbook()
     worksheet = workbook.active
