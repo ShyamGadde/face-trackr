@@ -1,9 +1,12 @@
 from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, NamedStyle, PatternFill, Side
 
 def create_workbook():
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Border, Font, NamedStyle, PatternFill, Side
-
+    """
+    It creates a workbook with a worksheet, adds a header row, and sets the style of the header row
+    :return: A workbook object.
+    """
     workbook = Workbook()
     worksheet = workbook.active
 
@@ -27,7 +30,14 @@ def create_workbook():
     return workbook
 
 
-def generate_attendance_report(attendees):
+def generate_attendance_report(attendees: dict):
+    """
+    It takes a dictionary of students and their attendance records, and creates an Excel file with the
+    attendance records
+    
+    :param attendees: dict
+    :type attendees: dict
+    """
     workbook = create_workbook()
     worksheet = workbook.active
 
