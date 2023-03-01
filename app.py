@@ -40,11 +40,6 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # load images with light and dark mode image
-        self.logo_image = ctk.CTkImage(
-            Image.open("assets/CustomTkinter_logo_single.png"),
-            size=(26, 26),
-        )
         self.home_icon = ctk.CTkImage(
             light_image=Image.open("assets/home-dark.png"),
             dark_image=Image.open("assets/home-light.png"),
@@ -69,7 +64,7 @@ class App(ctk.CTk):
         ctk.CTkLabel(
             self.navigation_frame,
             text="  FaceTrackr",
-            image=self.logo_image,
+            image=ctk.CTkImage(Image.open("assets/icon.png"), size=(26, 26)),
             compound="left",
             font=ctk.CTkFont(size=15, weight="bold"),
         ).grid(row=0, column=0, padx=20, pady=20)
@@ -104,9 +99,9 @@ class App(ctk.CTk):
         )
         self.admin_button.grid(row=2, column=0, sticky="ew")
 
-        ctk.CTkLabel(
-            self.navigation_frame, text="Appearance Mode:", anchor="s"
-        ).grid(row=5, column=0, padx=20, pady=(5, 0))
+        ctk.CTkLabel(self.navigation_frame, text="Appearance Mode:", anchor="s").grid(
+            row=5, column=0, padx=20, pady=(5, 0)
+        )
 
         ctk.CTkOptionMenu(
             self.navigation_frame,
@@ -118,6 +113,12 @@ class App(ctk.CTk):
         self.home_frame = ctk.CTkFrame(self, corner_radius=20)
         self.home_frame.grid_columnconfigure(0, weight=1)
         self.home_frame.grid_rowconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            self.home_frame,
+            text="",
+            image=ctk.CTkImage(Image.open("assets/icon.png"), size=(250, 250)),
+        ).grid(row=0, column=0, padx=30, pady=30)
 
         ctk.CTkButton(
             self.home_frame,
@@ -206,9 +207,7 @@ class App(ctk.CTk):
             width=160,
             height=50,
             command=self.add_student_button_event,
-        ).grid(
-            row=9, column=0, columnspan=6, padx=(0, 20), pady=20
-        )
+        ).grid(row=9, column=0, columnspan=6, padx=(0, 20), pady=20)
 
         # Create Manage Students Tab
         self.manage_students_tab.grid_columnconfigure(0, weight=1)
@@ -450,9 +449,7 @@ class App(ctk.CTk):
             self.update_window.grid_rowconfigure(3, weight=1)
 
             # Student ID
-            student_id_label = ctk.CTkLabel(
-                self.update_window, text="Student ID:"
-            )
+            student_id_label = ctk.CTkLabel(self.update_window, text="Student ID:")
             student_id_label.grid(row=0, column=0, padx=10, pady=10)
 
             student_id_entry = ctk.CTkEntry(
@@ -463,9 +460,7 @@ class App(ctk.CTk):
             student_id_entry.grid(row=0, column=1, padx=10, pady=10)
 
             # Student Name
-            student_name_label = ctk.CTkLabel(
-                self.update_window, text="Student Name:"
-            )
+            student_name_label = ctk.CTkLabel(self.update_window, text="Student Name:")
             student_name_label.grid(row=1, column=0, padx=10, pady=10)
             student_name_entry = ctk.CTkEntry(
                 self.update_window, textvariable=tk.StringVar(value=name)
@@ -480,9 +475,7 @@ class App(ctk.CTk):
                     id, student_name_entry.get()
                 ),
             )
-            update_student_button.grid(
-                row=2, column=0, columnspan=2, padx=10, pady=10
-            )
+            update_student_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
     def update_database_record(self, id, name):
         db = Database("student.db")
@@ -508,4 +501,5 @@ if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
     app = App()
+    app.wm_iconbitmap(default="assets/icon.ico")
     app.mainloop()
