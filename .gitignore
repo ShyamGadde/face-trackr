@@ -6,5 +6,5 @@ Attendance_records/
 .vscode/
 Images/
 Resources/
-attendance-records/
 __pycache__/
+student.db
