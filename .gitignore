@@ -1,10 +1,5 @@
 .idea/
-Attendance Monitoring System.exe
-Student_DB/
-database.pkl
-Attendance_records/
 .vscode/
-Images/
-Resources/
 __pycache__/
 student.db
+attendance-records/
