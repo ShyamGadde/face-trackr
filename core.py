@@ -24,6 +24,15 @@ STATUS_IMG = {
 
 
 def detect_faces(faces_queue, console_status_queue, exit_flag):
+    """
+    It captures video from the webcam, detects faces in the video, and displays the video with the
+    detected faces on the screen. It also sends the frames to the other process for face recognition.
+    
+    :param faces_queue: A multiprocessing.Queue object that will be used to send frames to the other
+    process
+    :param console_status_queue: A queue that will be used to send messages to the console thread
+    :param exit_flag: A multiprocessing.Value object that is set to 1 when the program is exiting
+    """
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
@@ -33,6 +42,9 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
     first_name = last_name = ""
 
     def update_console_status():
+        """
+        It updates the status on the console. It is run in a separate thread. It is also used to display the student's image, name, and ID on the console. It is also used to display the status of the console on the console.
+        """
         nonlocal status_code, student_img, student_id, first_name, last_name
 
         while not exit_flag.value:
@@ -129,6 +141,13 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
 
 
 def cache_database(database):
+    """
+    It takes a database name, connects to the database, fetches all the data, closes the database
+    connection, decodes the images, and unpickles the face encodings. It returns all the data. It is used to cache the data in the database so that it can be used by the other process.
+    
+    :param database: The path to the database file
+    :return: known_face_ids, known_face_names, known_student_imgs, known_face_encodings
+    """
     db = Database(database)
     (
         known_face_ids,
@@ -154,6 +173,15 @@ def cache_database(database):
 
 
 def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
+    """
+    It takes a frame, finds the faces in it, and then compares them to the faces in the database. If it
+    finds a match, it will add the student to the list of attendees. It will also send the student's name, ID, and image to the console process. 
+    
+    :param faces_queue: A queue that contains the frame and the face locations
+    :param console_status_queue: A queue that is used to send the status of the student to the console
+    :param exit_flag: A multiprocessing.Value object that is set to True when the program is exiting
+    :param attendees: a dictionary of student_id: (name, time)
+    """
     (
         known_face_ids,
         known_face_names,
@@ -201,6 +229,15 @@ def process_frame(faces_queue, console_status_queue, exit_flag, attendees):
 
 
 def create_session():
+    """
+    It creates two processes, one to detect faces and one to process the frames. 
+    
+    The first process, detect_faces, is responsible for detecting faces in the video stream and putting
+    them in a queue. 
+    
+    The second process, process_frame, is responsible for taking the faces from the queue and processing
+    them. 
+    """
     faces_queue = Queue()
     console_status_queue = Queue()
     exit_flag = Value("i", 0)
