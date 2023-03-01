@@ -356,7 +356,7 @@ class App(ctk.CTk):
 
     def upload_image_button_event(self):
         self.student_image_filepath = tk.filedialog.askopenfilename(
-            initialdir="./Student_DB",
+            initialdir="~/",
             title="Select image",
             filetypes=[("Image Files", "*.jpg *.png *.jpeg")],
         )
