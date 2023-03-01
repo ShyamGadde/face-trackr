@@ -442,12 +442,8 @@ class App(ctk.CTk):
         selection = self.student_treeview.focus()
         if selection:
             id, name = self.student_treeview.item(selection, "values")
-            self.update_window = None
-            if self.update_window is None or not self.toplevel_window.winfo_exists():
-                # create window if its None or destroyed
-                self.update_window = ctk.CTkToplevel(self)
-            else:
-                self.update_window.focus()  # if window exists focus it
+
+            self.update_window = ctk.CTkToplevel(self)
 
             self.update_window.title("Update Student")
             update_win_x = (self.screen_width / 2) - (400 / 2)
