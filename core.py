@@ -82,7 +82,7 @@ def detect_faces(faces_queue, console_status_queue, exit_flag):
 
         counter += 1
         if counter % 5 == 0:
-            # Only send every tenth frame to the other process
+            # Only send every fifth frame to the other process
             faces_queue.put((frame, face_locations))
 
         for top, right, bottom, left in face_locations:
