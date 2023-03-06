@@ -53,23 +53,24 @@ python app.py
 
 ## Screenshots/GIFs
 
-![img](docs\Homepage(Dark).png "Homepage (Dark)")
+### Homepage (Light and Dark Themes)
 
+<div>
+   <img src="docs/Homepage(Dark).png" width=49%>
+   <img src="docs/Homepage(Light).png" width=49%>
+</div>
 
+### Admin Panel
 
-![img](docs\Homepage(Light).png "Homepage (Light))")
+<img src="docs/Admin-Panel.png" width=60%>
 
+<img src="docs/Manage-Students-Tab.png" width=60%>
 
-![img](docs\Admin-Panel.png "Admin Panel")
+<img src="docs/Update-Record.png" width=60%>
 
+### Demo
 
-![img](docs\Manage-Students-Tab.png "Manage Students Tab")
-
-
-![img](docs\Update-Record.png "Update Records Tab")
-
-
-![img](docs\Demo.gif "Demo")
+<img src="docs/Demo.gif">
 
 ## Acknowledgements
 
